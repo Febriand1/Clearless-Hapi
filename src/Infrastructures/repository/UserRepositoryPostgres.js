@@ -3,16 +3,18 @@ import RegisteredUser from '../../Domains/users/entities/RegisteredUser.js';
 import UserRepository from '../../Domains/users/UserRepository.js';
 
 class UserRepositoryPostgres extends UserRepository {
-  constructor(db, idGenerator) {
+  constructor(pool, idGenerator) {
     super();
-    this._sql = db;
+    this._pool = pool;
     this._idGenerator = idGenerator;
   }
 
   async verifyAvailableUsername(username) {
-    const results = await this
-      ._sql`SELECT username FROM users WHERE username = ${username}`;
-    if (results.length > 0) {
+    const result = await this._pool.query(
+      'SELECT username FROM users WHERE username = $1',
+      [username],
+    );
+    if (result.rowCount) {
       throw new InvariantError('username tidak tersedia');
     }
   }
@@ -21,42 +23,53 @@ class UserRepositoryPostgres extends UserRepository {
     const { username, password, fullname, email, avatar } = registerUser;
     const id = `user-${this._idGenerator()}`;
 
-    const [result] = await this._sql`
-      INSERT INTO users (id, username, password, fullname, email, avatar)
-      VALUES (${id}, ${username}, ${password}, ${fullname}, ${email}, ${avatar})
-      RETURNING id, username, fullname, email, avatar
-    `;
+    const result = await this._pool.query(
+      'INSERT INTO users (id, username, password, fullname, email, avatar) VALUES($1, $2, $3, $4, $5, $6) RETURNING id, username, fullname, email, avatar',
+      [id, username, password, fullname, email, avatar],
+    );
 
-    return new RegisteredUser({ ...result });
+    return new RegisteredUser({ ...result.rows[0] });
   }
 
   async getPasswordByUsername(username) {
-    const [row] = await this
-      ._sql`SELECT password FROM users WHERE username = ${username}`;
-    if (!row) {
+    const result = await this._pool.query(
+      'SELECT password FROM users WHERE username = $1',
+      [username],
+    );
+
+    if (!result.rowCount) {
       throw new InvariantError('username tidak ditemukan');
     }
-    return row.password;
+
+    return result.rows[0].password;
   }
 
   async getIdByUsername(username) {
-    const [row] = await this
-      ._sql`SELECT id FROM users WHERE username = ${username}`;
-    if (!row) {
+    const result = await this._pool.query(
+      'SELECT id FROM users WHERE username = $1',
+      [username],
+    );
+
+    if (!result.rowCount) {
       throw new InvariantError('user tidak ditemukan');
     }
-    return row.id;
+
+    const { id } = result.rows[0];
+
+    return id;
   }
 
   async getUserById(userId) {
-    const [row] = await this
-      ._sql`SELECT id, username, fullname, email, avatar FROM users WHERE id = ${userId}`;
+    const result = await this._pool.query(
+      'SELECT id, username, fullname, email, avatar FROM users WHERE id = $1',
+      [userId],
+    );
 
-    if (!row) {
+    if (!result.rowCount) {
       throw new InvariantError('user tidak ditemukan');
     }
 
-    return row;
+    return result.rows[0];
   }
 
   async updateUser(userId, { fullname, email, avatar }) {
@@ -82,21 +95,18 @@ class UserRepositoryPostgres extends UserRepository {
 
     values.push(userId);
 
-    const query = `
-    UPDATE users
-    SET ${setClauses.join(', ')}
-    WHERE id = $${values.length}
-    RETURNING id, username, fullname, email, avatar
-  `;
+    const result = await this._pool.query(
+      `UPDATE users SET ${setClauses.join(', ')} WHERE id = $${
+        values.length
+      } RETURNING id, username, fullname, email, avatar`,
+      values,
+    );
 
-    const resultArray = await this._sql.query(query, values);
-    const result = resultArray[0];
-
-    if (!result) {
+    if (!result.rowCount) {
       throw new Error('USER_REPOSITORY.USER_NOT_FOUND');
     }
 
-    return result;
+    return result.rows[0];
   }
 }
 

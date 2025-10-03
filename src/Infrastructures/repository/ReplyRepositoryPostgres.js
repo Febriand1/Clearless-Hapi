@@ -3,21 +3,23 @@ import Reply from '../../Domains/replies/entities/Reply.js';
 import ReplyRepository from '../../Domains/replies/ReplyRepository.js';
 
 class ReplyRepositoryPostgres extends ReplyRepository {
-  constructor(db, idGenerator) {
+  constructor(pool, idGenerator) {
     super();
-    this._sql = db;
+    this._pool = pool;
     this._idGenerator = idGenerator;
   }
 
   async getReplyOwnerById(replyId) {
-    const [row] = await this
-      ._sql`SELECT owner FROM replies WHERE id = ${replyId}`;
+    const result = await this._pool.query(
+      'SELECT owner FROM replies WHERE id = $1',
+      [replyId],
+    );
 
-    if (!row) {
+    if (!result.rowCount) {
       throw new NotFoundError('reply tidak ditemukan');
     }
 
-    return row.owner;
+    return result.rows[0].owner;
   }
 
   async addReply(addReplies) {
@@ -25,41 +27,47 @@ class ReplyRepositoryPostgres extends ReplyRepository {
     const id = `reply-${this._idGenerator()}`;
     const createdAt = new Date().toISOString();
 
-    const [result] = await this._sql`
+    const result = await this._pool.query(
+      `
       INSERT INTO replies (id, content, comment_id, owner, created_at)
-      VALUES (${id}, ${content}, ${commentId}, ${owner}, ${createdAt})
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING id, content, owner
-    `;
+    `,
+      [id, content, commentId, owner, createdAt],
+    );
 
-    return new Reply(result);
+    return new Reply(result.rows[0]);
   }
 
-  async deleteReply(replyId) {
-    await this._sql`
-      UPDATE replies
-      SET is_delete = true
-      WHERE id = ${replyId}
-    `;
+  async deleteReply(ReplyId) {
+    await this._pool.query(
+      'UPDATE replies SET is_delete = true WHERE id = $1',
+      [ReplyId],
+    );
 
     return true;
   }
 
   async getReplyByCommentId(commentId) {
-    const results = await this._sql`
-      SELECT replies.id, replies.content, replies.created_at AS date, users.username, replies.is_delete
-      FROM replies
-      JOIN users ON replies.owner = users.id
-      WHERE replies.comment_id = ${commentId}
-      ORDER BY date ASC
-    `;
+    const result = await this._pool.query(
+      `SELECT r.id, r.content, r.created_at AS date, u.username, r.is_delete
+            FROM replies r
+            JOIN users u ON r.owner = u.id
+            WHERE r.comment_id = $1
+            ORDER BY date ASC`,
+      [commentId],
+    );
 
-    return results;
+    return result.rows;
   }
 
   async verifyAvailableReply(replyId) {
-    const [row] = await this._sql`SELECT id FROM replies WHERE id = ${replyId}`;
+    const result = await this._pool.query(
+      'SELECT id FROM replies WHERE id = $1',
+      [replyId],
+    );
 
-    if (!row) {
+    if (!result.rowCount) {
       throw new NotFoundError('reply tidak ditemukan');
     }
 

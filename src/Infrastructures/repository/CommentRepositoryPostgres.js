@@ -3,21 +3,23 @@ import CommentRepository from '../../Domains/comments/CommentRepository.js';
 import NotFoundError from '../../Commons/exceptions/NotFoundError.js';
 
 class CommentRepositoryPostgres extends CommentRepository {
-  constructor(db, idGenerator) {
+  constructor(pool, idGenerator) {
     super();
-    this._sql = db;
+    this._pool = pool;
     this._idGenerator = idGenerator;
   }
 
   async getCommentOwnerById(commentId) {
-    const [row] = await this
-      ._sql`SELECT owner FROM comments WHERE id = ${commentId}`;
+    const result = await this._pool.query(
+      'SELECT owner FROM comments WHERE id = $1',
+      [commentId],
+    );
 
-    if (!row) {
+    if (!result.rowCount) {
       throw new NotFoundError('comment tidak ditemukan');
     }
 
-    return row.owner;
+    return result.rows[0].owner;
   }
 
   async addComment(addComments) {
@@ -25,42 +27,45 @@ class CommentRepositoryPostgres extends CommentRepository {
     const id = `comment-${this._idGenerator()}`;
     const createdAt = new Date().toISOString();
 
-    const [result] = await this._sql`
-      INSERT INTO comments (id, content, thread_id, created_at, owner)
-      VALUES (${id}, ${content}, ${threadId}, ${createdAt}, ${owner})
-      RETURNING id, content, owner
-    `;
+    const result = await this._pool.query(
+      'INSERT INTO comments (id, content, thread_id, created_at, owner) VALUES ($1, $2, $3, $4, $5) RETURNING id, content, owner',
+      [id, content, threadId, createdAt, owner],
+    );
 
-    return new Comment(result);
+    return new Comment(result.rows[0]);
   }
 
   async deleteComment(commentId) {
-    await this._sql`
-      UPDATE comments
-      SET is_delete = true
-      WHERE id = ${commentId}
-    `;
+    await this._pool.query(
+      'UPDATE comments SET is_delete = true WHERE id = $1',
+      [commentId],
+    );
 
     return true;
   }
 
   async getCommentByThreadId(threadId) {
-    const results = await this._sql`
-      SELECT comments.id, users.username, comments.created_at AS date, comments.is_delete, comments.content
-      FROM comments
-      JOIN users ON comments.owner = users.id
-      WHERE comments.thread_id = ${threadId}
-      ORDER BY date ASC
-    `;
+    const result = await this._pool.query(
+      `
+        SELECT c.id, u.username, c.created_at AS date, c.is_delete, c.content
+        FROM comments c
+        JOIN users u ON c.owner = u.id
+        WHERE c.thread_id = $1
+        ORDER BY date ASC
+      `,
+      [threadId],
+    );
 
-    return results;
+    return result.rows;
   }
 
   async verifyAvailableComment(commentId) {
-    const [row] = await this
-      ._sql`SELECT id FROM comments WHERE id = ${commentId}`;
+    const result = await this._pool.query(
+      'SELECT id FROM comments WHERE id = $1',
+      [commentId],
+    );
 
-    if (!row) {
+    if (!result.rowCount) {
       throw new NotFoundError('comment tidak ditemukan');
     }
 

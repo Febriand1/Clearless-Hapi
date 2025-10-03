@@ -63,9 +63,9 @@ const createServer = async (container) => {
   server.route({
     method: 'GET',
     path: '/',
-    handler: () => ({
-      value: 'Say hello world!',
-    }),
+    handler: (request, h) => {
+      return 'Halo dari Hapi.js di Vercel!';
+    },
   });
 
   server.ext('onPreResponse', (request, h) => {

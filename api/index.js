@@ -1,6 +1,5 @@
 import createServer from '../src/Infrastructures/http/createServer.js';
 import container from '../src/Infrastructures/container.js';
-import serverless from 'serverless-http';
 
 // Validate required environment variables
 const requiredEnvVars = [
@@ -21,31 +20,43 @@ if (missingEnvVars.length > 0) {
 }
 
 let _server;
-let _handler;
 
 async function handler(req, res) {
   try {
     console.log('[Vercel] Request incoming:', req.method, req.url);
 
-    if (!_handler) {
+    if (!_server) {
       console.log('[Vercel] Creating Hapi server...');
       _server = await createServer(container);
       await _server.initialize();
-      _handler = serverless(_server.listener, {
-        binary: false,
-        request: (request, event, context) => {
-          // Ensure proper request handling
-          request.url = request.url || '/';
-          request.method = request.method || 'GET';
-        },
-      });
       console.log('[Vercel] Hapi server ready');
     }
 
-    console.log('[Vercel] Calling serverless handler...');
-    const result = await _handler(req, res);
-    console.log('[Vercel] Handler completed');
-    return result;
+    console.log('[Vercel] Processing request with Hapi...');
+
+    // Use Hapi's inject method directly
+    const result = await _server.inject({
+      method: req.method,
+      url: req.url,
+      headers: req.headers,
+      payload: req.body,
+    });
+
+    console.log('[Vercel] Hapi response status:', result.statusCode);
+    console.log('[Vercel] Hapi response headers:', result.headers);
+
+    // Set response headers
+    Object.keys(result.headers).forEach((key) => {
+      res.setHeader(key, result.headers[key]);
+    });
+
+    // Set status code
+    res.statusCode = result.statusCode;
+
+    // Send response
+    res.end(result.payload);
+
+    console.log('[Vercel] Response sent successfully');
   } catch (err) {
     console.error('[Vercel] Server initialization failed:', err);
     console.error('[Vercel] Error details:', err.message);

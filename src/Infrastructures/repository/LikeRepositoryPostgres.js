@@ -40,10 +40,11 @@ class LikeRepositoryPostgres extends LikeRepository {
       `
         SELECT 1 FROM likes
         WHERE user_id = $1 AND likeable_id = $2 AND likeable_type = $3
+        LIMIT 1
     `,
       [userId, likeableId, likeableType],
     );
-    return result.rows[0];
+    return result.rowCount > 0;
   }
 
   async countLikes({ likeableId, likeableType }) {

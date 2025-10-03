@@ -1627,6 +1627,7 @@ __metadata:
     node-pg-migrate: "npm:^8.0.3"
     nodemon: "npm:^2.0.9"
     pg: "npm:^8.16.3"
+    serverless-http: "npm:^4.0.0"
   languageName: unknown
   linkType: soft
 
@@ -3289,6 +3290,13 @@ __metadata:
   bin:
     semver: bin/semver.js
   checksum: 10c0/7fd341680a967a0abfd66f3a7d36ba44e52ff5d3e799e9a6cdb01a68160b64ef09be82b4af05459effeecdd836f002c2462555d2821cd890dfdfe36a0d9f56a5
+  languageName: node
+  linkType: hard
+
+"serverless-http@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "serverless-http@npm:4.0.0"
+  checksum: 10c0/e613beb1c93a331281fb0302423907531d9d197e7f7fef94466e22d350bb48b72e6020d39b5c7569a2d6736fde945cb198ed1d12001bfc9e82a5de791bb84c7d
   languageName: node
   linkType: hard
 

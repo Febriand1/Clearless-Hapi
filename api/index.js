@@ -28,4 +28,4 @@ async function handler(req, res) {
   }
 }
 
-export { handler };
+export default handler;

@@ -11,8 +11,8 @@ import likes from '../../Interfaces/http/api/likes/index.js';
 
 const createServer = async (container) => {
   const server = Hapi.server({
-    // host: process.env.HOST,
-    // port: process.env.PORT,
+    host: process.env.HOST || '0.0.0.0',
+    port: process.env.PORT || 5002,
   });
 
   await server.register(Jwt);

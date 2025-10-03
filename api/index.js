@@ -8,15 +8,13 @@ let _handler;
 
 async function handler(req, res) {
   try {
+    console.log('[Vercel] Request incoming');
     if (!_handler) {
+      console.log('[Vercel] Creating Hapi server...');
       _server = await createServer(container);
-      await _server.initialize();
-
-      // wrap Hapi server jadi serverless handler
-      _handler = serverless(_server.listener); // <-- gunakan serverless-http
-      console.log('[Vercel] Hapi server initialized');
+      _handler = serverless(_server.listener);
+      console.log('[Vercel] Hapi server ready');
     }
-
     return _handler(req, res);
   } catch (err) {
     console.error('[Vercel] Server initialization failed:', err);

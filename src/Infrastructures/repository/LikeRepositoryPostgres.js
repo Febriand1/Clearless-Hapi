@@ -1,7 +1,5 @@
 import LikeRepository from '../../Domains/likes/LikeRepository.js';
 
-// const likesCache = new Map();
-
 class LikeRepositoryPostgres extends LikeRepository {
   constructor(pool, idGenerator) {
     super();
@@ -48,22 +46,12 @@ class LikeRepositoryPostgres extends LikeRepository {
   }
 
   async countLikes({ likeableId, likeableType }) {
-    // const key = `${likeableType}:${likeableId}`;
-    // const now = Date.now();
-
-    // // cache 30 detik
-    // if (likesCache.has(key)) {
-    //   const { value, timestamp } = likesCache.get(key);
-    //   if (now - timestamp < 30000) return value;
-    // }
-
     const result = await this._pool.query(
       'SELECT COUNT(*) AS likes FROM likes WHERE likeable_id = $1 AND likeable_type = $2',
       [likeableId, likeableType],
     );
 
     const count = parseInt(result.rows[0].likes, 10);
-    // likesCache.set(key, { value: count, timestamp: now });
 
     return count;
   }

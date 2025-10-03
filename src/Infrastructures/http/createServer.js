@@ -60,17 +60,46 @@ const createServer = async (container) => {
     },
   ]);
 
+  // Handle OPTIONS requests for CORS
+  server.route({
+    method: 'OPTIONS',
+    path: '/{path*}',
+    handler: (request, h) => {
+      return h.response().code(200);
+    },
+  });
+
   server.route({
     method: 'GET',
     path: '/',
     handler: (request, h) => {
       console.log('[HAPI] Root Handler Accessed!');
-      return 'Halo dari Hapi.js di Vercel!';
+      return h
+        .response({
+          status: 'success',
+          message: 'Halo dari Hapi.js di Vercel!',
+          timestamp: new Date().toISOString(),
+        })
+        .code(200);
     },
   });
 
+  // Add CORS headers
   server.ext('onPreResponse', (request, h) => {
     const { response } = request;
+
+    // Add CORS headers
+    if (response && response.header) {
+      response.header('Access-Control-Allow-Origin', '*');
+      response.header(
+        'Access-Control-Allow-Methods',
+        'GET, POST, PUT, DELETE, OPTIONS',
+      );
+      response.header(
+        'Access-Control-Allow-Headers',
+        'Content-Type, Authorization',
+      );
+    }
 
     if (response instanceof Error) {
       const translatedError = DomainErrorTranslator.translate(response);

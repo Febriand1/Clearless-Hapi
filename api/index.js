@@ -13,7 +13,10 @@ async function handler(req, res) {
       await _server.initialize();
 
       // wrap Hapi server jadi serverless handler
-      _handler = serverless(_server.listener); // <-- gunakan serverless-http
+      _handler = serverless(_server.listener, {
+        request: req,
+        response: res,
+      }); // <-- gunakan serverless-http
       console.log('[Vercel] Hapi server initialized');
     }
 
@@ -25,4 +28,4 @@ async function handler(req, res) {
   }
 }
 
-export default handler;
+export { handler };

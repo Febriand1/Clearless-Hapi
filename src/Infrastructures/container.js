@@ -6,7 +6,7 @@ import { createContainer } from 'instances-container';
 import { nanoid } from 'nanoid';
 import bcrypt from 'bcrypt';
 import Jwt from '@hapi/jwt';
-import pool from './database/postgres/neon.js';
+import sql from './database/postgres/neon.js';
 
 // users
 import UserRepository from '../Domains/users/UserRepository.js';
@@ -61,7 +61,7 @@ container.register([
     parameter: {
       dependencies: [
         {
-          concrete: pool,
+          concrete: sql,
         },
         {
           concrete: nanoid,
@@ -75,7 +75,7 @@ container.register([
     parameter: {
       dependencies: [
         {
-          concrete: pool,
+          concrete: sql,
         },
       ],
     },
@@ -108,7 +108,7 @@ container.register([
     parameter: {
       dependencies: [
         {
-          concrete: pool,
+          concrete: sql,
         },
         {
           concrete: nanoid,
@@ -122,7 +122,7 @@ container.register([
     parameter: {
       dependencies: [
         {
-          concrete: pool,
+          concrete: sql,
         },
         {
           concrete: nanoid,
@@ -136,7 +136,7 @@ container.register([
     parameter: {
       dependencies: [
         {
-          concrete: pool,
+          concrete: sql,
         },
         {
           concrete: nanoid,
@@ -150,7 +150,7 @@ container.register([
     parameter: {
       dependencies: [
         {
-          concrete: pool,
+          concrete: sql,
         },
         {
           concrete: nanoid,

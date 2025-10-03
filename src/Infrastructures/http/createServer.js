@@ -64,6 +64,7 @@ const createServer = async (container) => {
     method: 'GET',
     path: '/',
     handler: (request, h) => {
+      console.log('[HAPI] Root Handler Accessed!');
       return 'Halo dari Hapi.js di Vercel!';
     },
   });

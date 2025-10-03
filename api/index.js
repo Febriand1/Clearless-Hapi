@@ -1,4 +1,3 @@
-// api/index.js
 import createServer from '../src/Infrastructures/http/createServer.js';
 import container from '../src/Infrastructures/container.js';
 import serverless from 'serverless-http';
@@ -12,6 +11,7 @@ async function handler(req, res) {
     if (!_handler) {
       console.log('[Vercel] Creating Hapi server...');
       _server = await createServer(container);
+      await _server.initialize();
       _handler = serverless(_server.listener);
       console.log('[Vercel] Hapi server ready');
     }

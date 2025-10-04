@@ -28,10 +28,10 @@ class GetAllThreadsUseCase {
       const comments = await this._commentRepository.getCommentByThreadId(t.id);
       commentCount += comments.length;
 
-      const replies = await this._replyRepository.getReplyByCommentId(
-        comments.id,
-      );
-      commentCount += replies.length;
+      for (const c of comments) {
+        const replies = await this._replyRepository.getReplyByCommentId(c.id);
+        commentCount += replies.length;
+      }
 
       let isLiked = false;
       if (userId) {

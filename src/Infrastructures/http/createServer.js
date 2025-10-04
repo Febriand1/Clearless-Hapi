@@ -99,6 +99,7 @@ const createServer = async (container) => {
         'Access-Control-Allow-Headers',
         'Content-Type, Authorization',
       );
+      response.header('Content-Encoding', 'identity');
     }
 
     if (response instanceof Error) {

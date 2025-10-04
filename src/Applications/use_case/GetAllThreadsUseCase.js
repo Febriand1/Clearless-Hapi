@@ -28,6 +28,11 @@ class GetAllThreadsUseCase {
       const comments = await this._commentRepository.getCommentByThreadId(t.id);
       commentCount += comments.length;
 
+      const replies = await this._replyRepository.getReplyByCommentId(
+        comments.id,
+      );
+      commentCount += replies.length;
+
       let isLiked = false;
       if (userId) {
         const likeRow = await this._likeRepository.checkLikeAvailability({

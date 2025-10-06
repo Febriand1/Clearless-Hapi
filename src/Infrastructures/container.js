@@ -57,6 +57,10 @@ const container = createContainer();
 // registering services and repository
 container.register([
   {
+    key: RedisCache.name,
+    Class: RedisCache,
+  },
+  {
     key: UserRepository.name,
     Class: UserRepositoryPostgres,
     parameter: {
@@ -157,7 +161,7 @@ container.register([
           concrete: nanoid,
         },
         {
-          concrete: RedisCache,
+          internal: RedisCache.name,
         },
       ],
     },

@@ -21,7 +21,7 @@ class LikeRepositoryPostgres extends LikeRepository {
       [id, userId, likeableId, likeableType],
     );
 
-    await this._cacheService.delete(`likeables:${likeableId}`);
+    await this._cacheService.delete(`likeables:${likeableType}:${likeableId}`);
 
     return result.rows[0].id;
   }
@@ -35,7 +35,7 @@ class LikeRepositoryPostgres extends LikeRepository {
       [userId, likeableId, likeableType],
     );
 
-    await this._cacheService.delete(`likeables:${likeableId}`);
+    await this._cacheService.delete(`likeables:${likeableType}:${likeableId}`);
 
     return true;
   }
@@ -53,12 +53,12 @@ class LikeRepositoryPostgres extends LikeRepository {
   }
 
   async countLikes({ likeableId, likeableType }) {
+    const cacheKey = `likeables:${likeableType}:${likeableId}`;
+
     try {
-      const result = await this._cacheService.get(`likeables:${likeableId}`);
-      return {
-        fromCache: true,
-        data: JSON.parse(result),
-      };
+      const cachedResult = await this._cacheService.get(cacheKey);
+      const { count } = JSON.parse(cachedResult);
+      return count;
     } catch (error) {
       const result = await this._pool.query(
         'SELECT COUNT(*) AS likes FROM likes WHERE likeable_id = $1 AND likeable_type = $2',
@@ -66,17 +66,13 @@ class LikeRepositoryPostgres extends LikeRepository {
       );
 
       const count = parseInt(result.rows[0].likes, 10);
-      const likes = { count };
 
-      await this.cacheService.set(
-        `likeables:${likeableId}`,
-        JSON.stringify(likes),
+      await this._cacheService.set(
+        cacheKey,
+        JSON.stringify({ count }),
       );
 
-      return {
-        fromCache: false,
-        data: likes,
-      };
+      return count;
     }
   }
 }

@@ -7,7 +7,7 @@ import { nanoid } from 'nanoid';
 import bcrypt from 'bcrypt';
 import Jwt from '@hapi/jwt';
 import pool from './database/postgres/neon.js';
-import RedisCache from './database/redis/redisCache.js';
+import CacheRedis from './database/redis/cacheRedis.js';
 
 // users
 import UserRepository from '../Domains/users/UserRepository.js';
@@ -57,8 +57,8 @@ const container = createContainer();
 // registering services and repository
 container.register([
   {
-    key: RedisCache.name,
-    Class: RedisCache,
+    key: CacheRedis.name,
+    Class: CacheRedis,
   },
   {
     key: UserRepository.name,
@@ -161,7 +161,7 @@ container.register([
           concrete: nanoid,
         },
         {
-          internal: RedisCache.name,
+          internal: CacheRedis.name,
         },
       ],
     },

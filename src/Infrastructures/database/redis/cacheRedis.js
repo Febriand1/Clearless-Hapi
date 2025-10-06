@@ -1,6 +1,6 @@
 import { Redis } from '@upstash/redis';
 
-class RedisCache {
+class CacheRedis {
   constructor() {
     this.redis = new Redis({
       url: process.env.UPSTASH_REDIS_REST_URL,
@@ -25,4 +25,4 @@ class RedisCache {
   }
 }
 
-export default RedisCache;
+export default CacheRedis;

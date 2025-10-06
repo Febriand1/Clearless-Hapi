@@ -21,7 +21,7 @@ class LikeRepositoryPostgres extends LikeRepository {
       [id, userId, likeableId, likeableType],
     );
 
-    await this._cacheService.delete(`likeables:${likeableType}:${likeableId}`);
+    await this._cacheService.delete(`likeables:${likeableId}`);
 
     return result.rows[0].id;
   }
@@ -35,7 +35,7 @@ class LikeRepositoryPostgres extends LikeRepository {
       [userId, likeableId, likeableType],
     );
 
-    await this._cacheService.delete(`likeables:${likeableType}:${likeableId}`);
+    await this._cacheService.delete(`likeables:${likeableId}`);
 
     return true;
   }
@@ -53,7 +53,7 @@ class LikeRepositoryPostgres extends LikeRepository {
   }
 
   async countLikes({ likeableId, likeableType }) {
-    const cacheKey = `likeables:${likeableType}:${likeableId}`;
+    const cacheKey = `likeables:${likeableId}`;
 
     try {
       const cachedResult = await this._cacheService.get(cacheKey);

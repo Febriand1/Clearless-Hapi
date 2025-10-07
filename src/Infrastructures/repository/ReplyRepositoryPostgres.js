@@ -39,10 +39,10 @@ class ReplyRepositoryPostgres extends ReplyRepository {
     return new Reply(result.rows[0]);
   }
 
-  async deleteReply(ReplyId) {
+  async deleteReply(replyId) {
     await this._pool.query(
       'UPDATE replies SET is_delete = true WHERE id = $1',
-      [ReplyId],
+      [replyId],
     );
 
     return true;

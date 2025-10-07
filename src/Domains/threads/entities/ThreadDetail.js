@@ -12,11 +12,13 @@ class ThreadDetail {
       likeCount,
       commentCount,
       isLiked,
+      isDelete,
     } = payload;
 
     this.id = id;
-    this.title = title;
-    this.body = body;
+    this.isDelete = !!isDelete;
+    this.title = this.isDelete ? '**thread telah dihapus**' : title;
+    this.body = this.isDelete ? '**thread telah dihapus**' : body;
     this.date = date;
     this.username = username;
     this.avatar = avatar || null;

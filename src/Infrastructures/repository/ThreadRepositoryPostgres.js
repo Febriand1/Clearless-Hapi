@@ -11,7 +11,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async verifyAvailableThread(threadId) {
     const result = await this._pool.query(
-      'SELECT id FROM threads WHERE id = $1',
+      'SELECT id FROM threads WHERE id = $1 AND is_delete = false',
       [threadId],
     );
 
@@ -24,7 +24,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async addThread(addThread) {
     const { title, body, owner } = addThread;
-    const id = `thread-${this._idGenerator()}`;
+    const id = `thread-${this._idGenerator(10)}`;
     const createdAt = new Date().toISOString();
 
     const result = await this._pool.query(
@@ -37,10 +37,10 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async getThreadById(threadId) {
     const result = await this._pool.query(
-      `SELECT t.id, t.title, t.body, t.created_at AS date, u.username
+      `SELECT t.id, t.title, t.body, t.created_at AS date, u.username, u.avatar
             FROM threads t
             JOIN users u ON t.owner = u.id
-            WHERE t.id = $1`,
+            WHERE t.id = $1 AND t.is_delete = false`,
       [threadId],
     );
 
@@ -50,9 +50,10 @@ class ThreadRepositoryPostgres extends ThreadRepository {
   async getAllThreads() {
     const result = await this._pool.query(
       `
-        SELECT t.id, t.title, t.body, t.created_at AS date, u.username
+        SELECT t.id, t.title, t.body, t.created_at AS date, u.username, u.avatar
             FROM threads t
             JOIN users u ON t.owner = u.id
+            WHERE t.is_delete = false
             ORDER BY t.created_at DESC
       `,
       [],
@@ -65,21 +66,48 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     const offset = (page - 1) * limit;
 
     const countResult = await this._pool.query(
-      'SELECT COUNT(*) AS total FROM threads',
+      'SELECT COUNT(*) AS total FROM threads WHERE is_delete = false',
       [],
     );
     const total = parseInt(countResult.rows[0].total, 10);
 
     const result = await this._pool.query(
-      `SELECT t.id, t.title, t.body, t.created_at AS date, u.username
+      `SELECT t.id, t.title, t.body, t.created_at AS date, u.username, u.avatar
             FROM threads t
             JOIN users u ON t.owner = u.id
+            WHERE t.is_delete = false
             ORDER BY t.created_at DESC
             LIMIT $1 OFFSET $2`,
       [limit, offset],
     );
 
     return { rows: result.rows, total };
+  }
+
+  async getThreadOwnerById(threadId) {
+    const result = await this._pool.query(
+      'SELECT owner FROM threads WHERE id = $1 AND is_delete = false',
+      [threadId],
+    );
+
+    if (!result.rowCount) {
+      throw new NotFoundError('thread tidak ditemukan');
+    }
+
+    return result.rows[0].owner;
+  }
+
+  async deleteThread(threadId) {
+    const result = await this._pool.query(
+      'DELETE FROM threads WHERE id = $1 AND is_delete = false RETURNING id',
+      [threadId],
+    );
+
+    if (!result.rowCount) {
+      throw new NotFoundError('thread tidak ditemukan');
+    }
+
+    return true;
   }
 }
 

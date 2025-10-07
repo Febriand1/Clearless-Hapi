@@ -62,6 +62,13 @@ DomainErrorTranslator._directories = {
     'threadId, commentId dan owner harus string',
   ),
 
+  'DELETE_THREAD.NOT_CONTAIN_NEEDED_PARAMETER': new InvariantError(
+    'harus mengirimkan threadId dan owner',
+  ),
+  'DELETE_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError(
+    'threadId dan owner harus string',
+  ),
+
   'THREAD_ID.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError(
     'tidak dapat membuat thread baru karena properti yang dibutuhkan tidak ada',
   ),
@@ -102,6 +109,9 @@ DomainErrorTranslator._directories = {
   ),
   'VALIDATION_COMMENT.NOT_THE_OWNER': new AuthorizationError(
     'anda bukan pemilik komentar ini',
+  ),
+  'VALIDATION_THREAD.NOT_THE_OWNER': new AuthorizationError(
+    'anda bukan pemilik thread ini',
   ),
 
   'NEW_LIKE.NOT_CONTAIN_NEEDED_PARAMETER': new InvariantError(

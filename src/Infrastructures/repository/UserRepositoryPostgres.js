@@ -21,7 +21,7 @@ class UserRepositoryPostgres extends UserRepository {
 
   async addUser(registerUser) {
     const { username, password, fullname, email, avatar } = registerUser;
-    const id = `user-${this._idGenerator()}`;
+    const id = `user-${this._idGenerator(10)}`;
 
     const result = await this._pool.query(
       'INSERT INTO users (id, username, password, fullname, email, avatar) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, username, fullname, email, avatar',

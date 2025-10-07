@@ -25,9 +25,9 @@ class DeleteReplyUseCase {
 
     await this._threadRepository.verifyAvailableThread(threadId);
     await this._commentRepository.getCommentOwnerById(commentId);
-    const reply = await this._replyRepository.getReplyOwnerById(replyId);
+    const replyOwner = await this._replyRepository.getReplyOwnerById(replyId);
 
-    if (reply.owner !== owner) {
+    if (replyOwner !== owner) {
       throw new Error('VALIDATION_REPLY.NOT_THE_OWNER');
     }
   }

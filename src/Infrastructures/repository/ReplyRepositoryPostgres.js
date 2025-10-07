@@ -24,7 +24,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
 
   async addReply(addReplies) {
     const { content, owner, commentId } = addReplies;
-    const id = `reply-${this._idGenerator()}`;
+    const id = `reply-${this._idGenerator(10)}`;
     const createdAt = new Date().toISOString();
 
     const result = await this._pool.query(
@@ -50,7 +50,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
 
   async getReplyByCommentId(commentId) {
     const result = await this._pool.query(
-      `SELECT r.id, r.content, r.created_at AS date, u.username, r.is_delete
+      `SELECT r.id, r.content, r.created_at AS date, u.username, u.avatar, r.is_delete
             FROM replies r
             JOIN users u ON r.owner = u.id
             WHERE r.comment_id = $1
@@ -59,6 +59,19 @@ class ReplyRepositoryPostgres extends ReplyRepository {
     );
 
     return result.rows;
+  }
+
+  async verifyReplyBelongsToComment({ replyId, commentId }) {
+    const result = await this._pool.query(
+      'SELECT id FROM replies WHERE id = $1 AND comment_id = $2',
+      [replyId, commentId],
+    );
+
+    if (!result.rowCount) {
+      throw new NotFoundError('reply tidak ditemukan');
+    }
+
+    return true;
   }
 
   async verifyAvailableReply(replyId) {

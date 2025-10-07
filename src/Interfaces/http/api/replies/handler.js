@@ -1,6 +1,7 @@
+import autoBind from 'auto-bind';
 import AddReplyUseCase from '../../../../Applications/use_case/AddReplyUseCase.js';
 import DeleteReplyUseCase from '../../../../Applications/use_case/DeleteReplyUseCase.js';
-import autoBind from 'auto-bind';
+import GetCommentRepliesUseCase from '../../../../Applications/use_case/GetCommentRepliesUseCase.js';
 
 class RepliesHandler {
   constructor(container) {
@@ -41,6 +42,25 @@ class RepliesHandler {
 
     return {
       status: 'success',
+    };
+  }
+
+  async getRepliesByCommentHandler(request) {
+    const { threadId, commentId } = request.params;
+    const getCommentRepliesUseCase = this._container.getInstance(
+      GetCommentRepliesUseCase.name,
+    );
+
+    const replies = await getCommentRepliesUseCase.execute({
+      threadId,
+      commentId,
+    });
+
+    return {
+      status: 'success',
+      data: {
+        replies,
+      },
     };
   }
 }

@@ -8,22 +8,23 @@ import threads from '../../Interfaces/http/api/threads/index.js';
 import comments from '../../Interfaces/http/api/comments/index.js';
 import replies from '../../Interfaces/http/api/replies/index.js';
 import likes from '../../Interfaces/http/api/likes/index.js';
+import { config } from '../../Utils/config.js';
 
 const createServer = async (container) => {
   const server = Hapi.server({
-    host: process.env.HOST || '0.0.0.0',
-    port: process.env.PORT || 5002,
+    host: config.server.host,
+    port: config.server.port,
   });
 
   await server.register(Jwt);
 
   server.auth.strategy('forumapi_jwt', 'jwt', {
-    keys: process.env.ACCESS_TOKEN_KEY,
+    keys: config.tokenize.accessToken,
     verify: {
       aud: false,
       iss: false,
       sub: false,
-      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+      maxAgeSec: config.tokenize.accessTokenAge,
     },
     validate: (artifacts) => ({
       isValid: true,
@@ -104,6 +105,7 @@ const createServer = async (container) => {
 
     if (response instanceof Error) {
       const translatedError = DomainErrorTranslator.translate(response);
+      console.log(translatedError);
 
       if (translatedError instanceof ClientError) {
         const newResponse = h.response({

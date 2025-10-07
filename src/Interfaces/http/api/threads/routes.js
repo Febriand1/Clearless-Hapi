@@ -19,6 +19,11 @@ const routes = (handler) => [
     method: 'GET',
     path: '/threads',
     handler: handler.getAllThreadsHandler,
+  },
+  {
+    method: 'DELETE',
+    path: '/threads/{threadId}',
+    handler: handler.deleteThreadHandler,
     options: {
       auth: 'forumapi_jwt',
     },

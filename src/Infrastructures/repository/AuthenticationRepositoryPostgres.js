@@ -2,13 +2,18 @@ import InvariantError from '../../Commons/exceptions/InvariantError.js';
 import AuthenticationRepository from '../../Domains/authentications/AuthenticationRepository.js';
 
 class AuthenticationRepositoryPostgres extends AuthenticationRepository {
-  constructor(pool) {
+  constructor(pool, idGenerator) {
     super();
     this._pool = pool;
+    this._idGenerator = idGenerator;
   }
 
   async addToken(token) {
-    await this._pool.query('INSERT INTO authentications (token) VALUES ($1)', [token]);
+    const id = `token-${this._idGenerator(10)}`;
+    await this._pool.query(
+      'INSERT INTO authentications (id, token) VALUES ($1, $2)',
+      [id, token],
+    );
   }
 
   async checkAvailabilityToken(token) {

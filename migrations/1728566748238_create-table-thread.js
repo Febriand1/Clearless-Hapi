@@ -22,6 +22,11 @@ export const up = (pgm) => {
       type: 'TIMESTAMPTZ',
       default: pgm.func('now()'),
     },
+    is_delete: {
+      type: 'BOOLEAN',
+      notNull: true,
+      default: false,
+    },
   });
 
   pgm.addConstraint('threads', 'fk_threads_owner_users', {

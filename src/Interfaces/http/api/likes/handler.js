@@ -1,5 +1,6 @@
-import UpdateLikeUseCase from '../../../../Applications/use_case/UpdateLikeUseCase.js';
 import autoBind from 'auto-bind';
+import GetLikeStatusUseCase from '../../../../Applications/use_case/GetLikeStatusUseCase.js';
+import UpdateLikeUseCase from '../../../../Applications/use_case/UpdateLikeUseCase.js';
 
 class LikesHandler {
   constructor(container) {
@@ -45,6 +46,36 @@ class LikesHandler {
         },
       })
       .code(200);
+  }
+
+  async getLikeStatusHandler(request) {
+    const { threadId, commentId, replyId } = request.params;
+    const userId =
+      request.auth && request.auth.credentials
+        ? request.auth.credentials.id
+        : null;
+
+    const getLikeStatusUseCase = this._container.getInstance(
+      GetLikeStatusUseCase.name,
+    );
+
+    const { likeCount, isLiked, likeableId, likeableType } =
+      await getLikeStatusUseCase.execute({
+        threadId,
+        commentId: commentId || null,
+        replyId: replyId || null,
+        userId,
+      });
+
+    return {
+      status: 'success',
+      data: {
+        likeCount,
+        isLiked,
+        likeableId,
+        likeableType,
+      },
+    };
   }
 }
 

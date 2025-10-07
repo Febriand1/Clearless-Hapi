@@ -31,25 +31,29 @@ import RefreshAuthenticationUseCase from '../Applications/use_case/RefreshAuthen
 import ThreadRepository from '../Domains/threads/ThreadRepository.js';
 import ThreadRepositoryPostgres from './repository/ThreadRepositoryPostgres.js';
 import AddThreadUseCase from '../Applications/use_case/AddThreadUseCase.js';
-import ShowThreadUseCase from '../Applications/use_case/ShowThreadUseCase.js';
+import GetThreadDetailUseCase from '../Applications/use_case/GetThreadDetailUseCase.js';
 import GetAllThreadsUseCase from '../Applications/use_case/GetAllThreadsUseCase.js';
+import DeleteThreadUseCase from '../Applications/use_case/DeleteThreadUseCase.js';
 
 // comments
 import CommentRepository from '../Domains/comments/CommentRepository.js';
 import CommentRepositoryPostgres from './repository/CommentRepositoryPostgres.js';
 import AddCommentUseCase from '../Applications/use_case/AddCommentUseCase.js';
 import DeleteCommentUseCase from '../Applications/use_case/DeleteCommentUseCase.js';
+import GetThreadCommentsUseCase from '../Applications/use_case/GetThreadCommentsUseCase.js';
 
 // replies
 import ReplyRepository from '../Domains/replies/ReplyRepository.js';
 import ReplyRepositoryPostgres from './repository/ReplyRepositoryPostgres.js';
 import AddReplyUseCase from '../Applications/use_case/AddReplyUseCase.js';
 import DeleteReplyUseCase from '../Applications/use_case/DeleteReplyUseCase.js';
+import GetCommentRepliesUseCase from '../Applications/use_case/GetCommentRepliesUseCase.js';
 
 // likes
 import LikeRepository from '../Domains/likes/LikeRepository.js';
 import LikeRepositoryPostgres from './repository/LikeRepositoryPostgres.js';
 import UpdateLikeUseCase from '../Applications/use_case/UpdateLikeUseCase.js';
+import GetLikeStatusUseCase from '../Applications/use_case/GetLikeStatusUseCase.js';
 
 // creating container
 const container = createContainer();
@@ -81,6 +85,9 @@ container.register([
       dependencies: [
         {
           concrete: pool,
+        },
+        {
+          concrete: nanoid,
         },
       ],
     },
@@ -307,8 +314,33 @@ container.register([
     },
   },
   {
-    key: ShowThreadUseCase.name,
-    Class: ShowThreadUseCase,
+    key: GetThreadDetailUseCase.name,
+    Class: GetThreadDetailUseCase,
+    parameter: {
+      injectType: 'destructuring',
+      dependencies: [
+        {
+          name: 'threadRepository',
+          internal: ThreadRepository.name,
+        },
+        {
+          name: 'likeRepository',
+          internal: LikeRepository.name,
+        },
+        {
+          name: 'commentRepository',
+          internal: CommentRepository.name,
+        },
+        {
+          name: 'replyRepository',
+          internal: ReplyRepository.name,
+        },
+      ],
+    },
+  },
+  {
+    key: DeleteThreadUseCase.name,
+    Class: DeleteThreadUseCase,
     parameter: {
       injectType: 'destructuring',
       dependencies: [
@@ -344,6 +376,23 @@ container.register([
         {
           name: 'threadRepository',
           internal: ThreadRepository.name,
+        },
+      ],
+    },
+  },
+  {
+    key: GetThreadCommentsUseCase.name,
+    Class: GetThreadCommentsUseCase,
+    parameter: {
+      injectType: 'destructuring',
+      dependencies: [
+        {
+          name: 'threadRepository',
+          internal: ThreadRepository.name,
+        },
+        {
+          name: 'commentRepository',
+          internal: CommentRepository.name,
         },
       ],
     },
@@ -387,6 +436,27 @@ container.register([
     },
   },
   {
+    key: GetCommentRepliesUseCase.name,
+    Class: GetCommentRepliesUseCase,
+    parameter: {
+      injectType: 'destructuring',
+      dependencies: [
+        {
+          name: 'threadRepository',
+          internal: ThreadRepository.name,
+        },
+        {
+          name: 'commentRepository',
+          internal: CommentRepository.name,
+        },
+        {
+          name: 'replyRepository',
+          internal: ReplyRepository.name,
+        },
+      ],
+    },
+  },
+  {
     key: DeleteReplyUseCase.name,
     Class: DeleteReplyUseCase,
     parameter: {
@@ -403,6 +473,31 @@ container.register([
         {
           name: 'commentRepository',
           internal: CommentRepository.name,
+        },
+      ],
+    },
+  },
+  {
+    key: GetLikeStatusUseCase.name,
+    Class: GetLikeStatusUseCase,
+    parameter: {
+      injectType: 'destructuring',
+      dependencies: [
+        {
+          name: 'likeRepository',
+          internal: LikeRepository.name,
+        },
+        {
+          name: 'threadRepository',
+          internal: ThreadRepository.name,
+        },
+        {
+          name: 'commentRepository',
+          internal: CommentRepository.name,
+        },
+        {
+          name: 'replyRepository',
+          internal: ReplyRepository.name,
         },
       ],
     },

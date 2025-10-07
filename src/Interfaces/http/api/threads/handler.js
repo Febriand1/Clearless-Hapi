@@ -1,7 +1,8 @@
-import AddThreadUseCase from '../../../../Applications/use_case/AddThreadUseCase.js';
-import ShowThreadUseCase from '../../../../Applications/use_case/ShowThreadUseCase.js';
-import GetAllThreadsUseCase from '../../../../Applications/use_case/GetAllThreadsUseCase.js';
 import autoBind from 'auto-bind';
+import AddThreadUseCase from '../../../../Applications/use_case/AddThreadUseCase.js';
+import GetAllThreadsUseCase from '../../../../Applications/use_case/GetAllThreadsUseCase.js';
+import GetThreadDetailUseCase from '../../../../Applications/use_case/GetThreadDetailUseCase.js';
+import DeleteThreadUseCase from '../../../../Applications/use_case/DeleteThreadUseCase.js';
 
 class ThreadsHandler {
   constructor(container) {
@@ -31,8 +32,8 @@ class ThreadsHandler {
 
   async getThreadByIdHandler(request) {
     const { threadId } = request.params;
-    const showThreadUseCase = this._container.getInstance(
-      ShowThreadUseCase.name,
+    const getThreadDetailUseCase = this._container.getInstance(
+      GetThreadDetailUseCase.name,
     );
 
     const userId =
@@ -40,7 +41,7 @@ class ThreadsHandler {
         ? request.auth.credentials.id
         : null;
 
-    const thread = await showThreadUseCase.execute(threadId, userId);
+    const thread = await getThreadDetailUseCase.execute({ threadId, userId });
 
     return {
       status: 'success',
@@ -76,6 +77,20 @@ class ThreadsHandler {
         threads,
         meta,
       },
+    };
+  }
+
+  async deleteThreadHandler(request) {
+    const { threadId } = request.params;
+    const { id: owner } = request.auth.credentials;
+    const deleteThreadUseCase = this._container.getInstance(
+      DeleteThreadUseCase.name,
+    );
+
+    await deleteThreadUseCase.execute({ threadId, owner });
+
+    return {
+      status: 'success',
     };
   }
 }

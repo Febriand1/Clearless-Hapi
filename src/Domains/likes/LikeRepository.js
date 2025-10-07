@@ -11,7 +11,15 @@ class LikeRepository {
     throw new Error('LIKE_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 
+  async countLikes(payload) {
+    throw new Error('LIKE_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  }
+
   async getLikesCount(commentId) {
+    throw new Error('LIKE_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  }
+
+  async deleteLikesByLikeableIds(payload) {
     throw new Error('LIKE_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 }

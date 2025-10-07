@@ -18,11 +18,11 @@ class DeleteCommentUseCase {
     const { threadId, commentId, owner } = payload;
 
     await this._threadRepository.verifyAvailableThread(threadId);
-    const comment = await this._commentRepository.getCommentOwnerById(
+    const commentOwner = await this._commentRepository.getCommentOwnerById(
       commentId,
     );
 
-    if (comment.owner !== owner) {
+    if (commentOwner !== owner) {
       throw new Error('VALIDATION_COMMENT.NOT_THE_OWNER');
     }
   }

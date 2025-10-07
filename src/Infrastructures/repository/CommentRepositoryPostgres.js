@@ -24,7 +24,7 @@ class CommentRepositoryPostgres extends CommentRepository {
 
   async addComment(addComments) {
     const { content, owner, threadId } = addComments;
-    const id = `comment-${this._idGenerator()}`;
+    const id = `comment-${this._idGenerator(10)}`;
     const createdAt = new Date().toISOString();
 
     const result = await this._pool.query(
@@ -47,7 +47,7 @@ class CommentRepositoryPostgres extends CommentRepository {
   async getCommentByThreadId(threadId) {
     const result = await this._pool.query(
       `
-        SELECT c.id, u.username, c.created_at AS date, c.is_delete, c.content
+        SELECT c.id, u.username, u.avatar, c.created_at AS date, c.is_delete, c.content
         FROM comments c
         JOIN users u ON c.owner = u.id
         WHERE c.thread_id = $1
@@ -57,6 +57,19 @@ class CommentRepositoryPostgres extends CommentRepository {
     );
 
     return result.rows;
+  }
+
+  async verifyCommentBelongsToThread({ commentId, threadId }) {
+    const result = await this._pool.query(
+      'SELECT id FROM comments WHERE id = $1 AND thread_id = $2',
+      [commentId, threadId],
+    );
+
+    if (!result.rowCount) {
+      throw new NotFoundError('comment tidak ditemukan');
+    }
+
+    return true;
   }
 
   async verifyAvailableComment(commentId) {

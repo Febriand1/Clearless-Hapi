@@ -50,6 +50,7 @@ class GetAllThreadsUseCase {
           body: t.body,
           date: t.date,
           username: t.username,
+          avatar: t.avatar,
           likeCount,
           isLiked,
           commentCount,

@@ -15,6 +15,10 @@ class ReplyRepository {
     throw new Error('REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 
+  async verifyReplyBelongsToComment({ replyId, commentId }) {
+    throw new Error('REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  }
+
   async verifyAvailableReply(replyId) {
     throw new Error('REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }

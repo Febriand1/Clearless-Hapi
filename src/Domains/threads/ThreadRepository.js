@@ -18,6 +18,14 @@ class ThreadRepository {
   async getAllThreadsWithPagination(pagination) {
     throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
+
+  async getThreadOwnerById(threadId) {
+    throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  }
+
+  async deleteThread(threadId) {
+    throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  }
 }
 
 export default ThreadRepository;

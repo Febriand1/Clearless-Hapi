@@ -1,5 +1,13 @@
 const routes = (handler) => [
   {
+    method: 'GET',
+    path: '/threads/{threadId}/comments',
+    handler: handler.getCommentsByThreadHandler,
+    options: {
+      auth: 'forumapi_jwt',
+    },
+  },
+  {
     method: 'POST',
     path: '/threads/{threadId}/comments',
     handler: handler.postCommentHandler,

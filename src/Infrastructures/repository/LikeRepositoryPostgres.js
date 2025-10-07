@@ -10,7 +10,7 @@ class LikeRepositoryPostgres extends LikeRepository {
 
   async addLike(newLike) {
     const { userId, likeableId, likeableType } = newLike;
-    const id = `like-${this._idGenerator()}`;
+    const id = `like-${this._idGenerator(10)}`;
 
     const result = await this._pool.query(
       `
@@ -74,6 +74,33 @@ class LikeRepositoryPostgres extends LikeRepository {
 
       return count;
     }
+  }
+
+  async deleteLikesByLikeableIds({ likeableType, likeableIds }) {
+    if (
+      !likeableType ||
+      typeof likeableType !== 'string' ||
+      !Array.isArray(likeableIds) ||
+      likeableIds.length === 0
+    ) {
+      return false;
+    }
+
+    await this._pool.query(
+      `
+        DELETE FROM likes
+        WHERE likeable_type = $1 AND likeable_id = ANY($2::text[])
+      `,
+      [likeableType, likeableIds],
+    );
+
+    await Promise.all(
+      likeableIds.map((id) =>
+        this._cacheService.delete(`likeables:${id}`).catch(() => null),
+      ),
+    );
+
+    return true;
   }
 }
 

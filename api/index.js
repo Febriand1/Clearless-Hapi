@@ -1,12 +1,11 @@
 import createServer from '../src/Infrastructures/http/createServer.js';
 import container from '../src/Infrastructures/container.js';
-import { config } from '../src/Utils/config.js';
 
 // Validate required environment variables
 const requiredEnvVars = [
-  config.neon.pgUrl,
-  config.tokenize.accessToken,
-  config.tokenize.accessTokenAge,
+  'DATABASE_URL',
+  'ACCESS_TOKEN_KEY',
+  'ACCESS_TOKEN_AGE',
 ];
 const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
 

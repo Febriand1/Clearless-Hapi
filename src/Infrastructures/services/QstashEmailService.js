@@ -59,21 +59,16 @@ class QstashEmailService extends EmailService {
 
     try {
       console.info(
-        `[QSTASH] Publishing verification email for: ${to} at ${new Date().toISOString()}`,
+        `[QSTASH] Publishing verification email for: ${to} at ${new Date().toISOString()}`
       );
-      await this._client.publishJSON(publishPayload);
+      const { messageId } = await this._client.publishJSON(publishPayload);
       console.info(
-        `[QSTASH] Successfully published verification  ${publishPayload}`,
-      );
-      console.info(
-        `[QSTASH] Successfully published verification email for: ${to} with messageId: ${
-          publishPayload.messageId
-        } at ${new Date().toISOString()}`,
+        `[QSTASH] Successfully published verification email for: ${to} with messageId: ${messageId} at ${new Date().toISOString()}`
       );
     } catch (error) {
       console.error(
         `[QSTASH] Failed to publish verification email for: ${to}`,
-        error,
+        error
       );
       throw error;
     }

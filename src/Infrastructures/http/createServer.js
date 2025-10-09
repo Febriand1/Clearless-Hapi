@@ -8,12 +8,18 @@ import threads from '../../Interfaces/http/api/threads/index.js';
 import comments from '../../Interfaces/http/api/comments/index.js';
 import replies from '../../Interfaces/http/api/replies/index.js';
 import likes from '../../Interfaces/http/api/likes/index.js';
+import email from '../../Interfaces/http/api/email/index.js';
 import { config } from '../../Utils/config.js';
 
 const createServer = async (container) => {
   const server = Hapi.server({
     host: config.server.host,
     port: config.server.port,
+    routes: {
+      cors: {
+        origin: ['*'], // For production, you should restrict this to your frontend domain
+      },
+    },
   });
 
   await server.register(Jwt);
@@ -59,16 +65,10 @@ const createServer = async (container) => {
       plugin: likes,
       options: { container },
     },
-  ]);
-
-  // Handle OPTIONS requests for CORS
-  server.route({
-    method: 'OPTIONS',
-    path: '/{path*}',
-    handler: (request, h) => {
-      return h.response().code(200);
+    {
+      plugin: email,
     },
-  });
+  ]);
 
   server.route({
     method: 'GET',
@@ -85,27 +85,12 @@ const createServer = async (container) => {
     },
   });
 
-  // Add CORS headers
   server.ext('onPreResponse', (request, h) => {
     const { response } = request;
 
-    // Add CORS headers
-    if (response && response.header) {
-      response.header('Access-Control-Allow-Origin', '*');
-      response.header(
-        'Access-Control-Allow-Methods',
-        'GET, POST, PUT, DELETE, OPTIONS',
-      );
-      response.header(
-        'Access-Control-Allow-Headers',
-        'Content-Type, Authorization',
-      );
-      response.header('Content-Encoding', 'identity');
-    }
-
     if (response instanceof Error) {
       const translatedError = DomainErrorTranslator.translate(response);
-      console.log(translatedError);
+      // console.log(translatedError);
 
       if (translatedError instanceof ClientError) {
         const newResponse = h.response({

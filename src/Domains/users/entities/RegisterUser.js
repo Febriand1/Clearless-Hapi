@@ -7,7 +7,7 @@ class RegisterUser {
     this.username = username;
     this.password = password;
     this.fullname = fullname;
-    this.email = email;
+    this.email = email.trim().toLowerCase();
     this.avatar = avatar || null;
   }
 
@@ -31,6 +31,10 @@ class RegisterUser {
 
     if (!username.match(/^[\w]+$/)) {
       throw new Error('REGISTER_USER.USERNAME_CONTAIN_RESTRICTED_CHARACTER');
+    }
+
+    if (typeof email === 'string' && email.trim().length === 0) {
+      throw new Error('REGISTER_USER.EMAIL_INVALID');
     }
   }
 }

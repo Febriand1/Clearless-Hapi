@@ -2,13 +2,15 @@ class RegisteredUser {
   constructor(payload) {
     this._verifyPayload(payload);
 
-    const { id, username, fullname, email, avatar } = payload;
+    const { id, username, fullname, email, avatar, is_email_verified } =
+      payload;
 
     this.id = id;
     this.username = username;
     this.fullname = fullname;
     this.email = email;
     this.avatar = avatar || null;
+    this.emailVerified = Boolean(is_email_verified);
   }
 
   _verifyPayload({ id, username, fullname, email }) {

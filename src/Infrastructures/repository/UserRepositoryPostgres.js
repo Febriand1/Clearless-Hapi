@@ -19,13 +19,50 @@ class UserRepositoryPostgres extends UserRepository {
     }
   }
 
-  async addUser(registerUser) {
+  async verifyAvailableEmail(email) {
+    const normalizedEmail = typeof email === 'string' ? email.toLowerCase() : email;
+    const result = await this._pool.query(
+      'SELECT email FROM users WHERE email = $1',
+      [normalizedEmail],
+    );
+    if (result.rowCount) {
+      throw new InvariantError('email sudah digunakan');
+    }
+  }
+
+  async addUser(registerUser, verificationPayload = {}) {
     const { username, password, fullname, email, avatar } = registerUser;
+    const {
+      codeHash = null,
+      expiresAt = null,
+      isVerified = false,
+    } = verificationPayload;
     const id = `user-${this._idGenerator(10)}`;
 
     const result = await this._pool.query(
-      'INSERT INTO users (id, username, password, fullname, email, avatar) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, username, fullname, email, avatar',
-      [id, username, password, fullname, email, avatar],
+      `INSERT INTO users (
+        id,
+        username,
+        password,
+        fullname,
+        email,
+        avatar,
+        is_email_verified,
+        email_verification_code,
+        email_verification_expires_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING id, username, fullname, email, avatar, is_email_verified`,
+      [
+        id,
+        username,
+        password,
+        fullname,
+        email,
+        avatar,
+        isVerified,
+        codeHash,
+        expiresAt,
+      ],
     );
 
     return new RegisteredUser({ ...result.rows[0] });
@@ -33,7 +70,9 @@ class UserRepositoryPostgres extends UserRepository {
 
   async getPasswordByUsername(username) {
     const result = await this._pool.query(
-      'SELECT password FROM users WHERE username = $1',
+      `SELECT id, password, is_email_verified
+      FROM users
+      WHERE username = $1`,
       [username],
     );
 
@@ -41,12 +80,14 @@ class UserRepositoryPostgres extends UserRepository {
       throw new InvariantError('username tidak ditemukan');
     }
 
-    return result.rows[0].password;
+    return result.rows[0];
   }
 
   async getIdByUsername(username) {
     const result = await this._pool.query(
-      'SELECT id FROM users WHERE username = $1',
+      `SELECT id, is_email_verified
+      FROM users
+      WHERE username = $1`,
       [username],
     );
 
@@ -59,9 +100,42 @@ class UserRepositoryPostgres extends UserRepository {
     return id;
   }
 
+  async getUserByEmail(email) {
+    const normalizedEmail = typeof email === 'string' ? email.toLowerCase() : email;
+    const result = await this._pool.query(
+      `SELECT
+        id,
+        username,
+        fullname,
+        email,
+        avatar,
+        is_email_verified,
+        email_verification_code,
+        email_verification_expires_at,
+        email_verified_at
+      FROM users
+      WHERE email = $1`,
+      [normalizedEmail],
+    );
+
+    if (!result.rowCount) {
+      throw new InvariantError('user tidak ditemukan');
+    }
+
+    return result.rows[0];
+  }
+
   async getUserById(userId) {
     const result = await this._pool.query(
-      'SELECT id, username, fullname, email, avatar FROM users WHERE id = $1',
+      `SELECT
+        id,
+        username,
+        fullname,
+        email,
+        avatar,
+        is_email_verified
+      FROM users
+      WHERE id = $1`,
       [userId],
     );
 
@@ -98,7 +172,7 @@ class UserRepositoryPostgres extends UserRepository {
     const result = await this._pool.query(
       `UPDATE users SET ${setClauses.join(', ')} WHERE id = $${
         values.length
-      } RETURNING id, username, fullname, email, avatar`,
+      } RETURNING id, username, fullname, email, avatar, is_email_verified`,
       values,
     );
 
@@ -107,6 +181,30 @@ class UserRepositoryPostgres extends UserRepository {
     }
 
     return result.rows[0];
+  }
+
+  async verifyUserEmail(userId) {
+    const result = await this._pool.query(
+      `UPDATE users
+      SET
+        is_email_verified = true,
+        email_verification_code = NULL,
+        email_verification_expires_at = NULL,
+        email_verified_at = NOW()
+      WHERE id = $1
+      RETURNING id, username, fullname, email, avatar, is_email_verified`,
+      [userId],
+    );
+
+    if (!result.rowCount) {
+      throw new InvariantError('user tidak ditemukan');
+    }
+
+    return result.rows[0];
+  }
+
+  async deleteUserById(userId) {
+    await this._pool.query('DELETE FROM users WHERE id = $1', [userId]);
   }
 }
 

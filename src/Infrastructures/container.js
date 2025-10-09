@@ -8,6 +8,7 @@ import bcrypt from 'bcrypt';
 import Jwt from '@hapi/jwt';
 import pool from './database/postgres/neon.js';
 import CacheRedis from './database/redis/cacheRedis.js';
+import { config } from '../Utils/config.js';
 
 // users
 import UserRepository from '../Domains/users/UserRepository.js';
@@ -17,6 +18,7 @@ import BcryptPasswordHash from './security/BcryptPasswordHash.js';
 import AddUserUseCase from '../Applications/use_case/AddUserUseCase.js';
 import GetUserUseCase from '../Applications/use_case/GetUserUseCase.js';
 import UpdateUserUseCase from '../Applications/use_case/UpdateUserUseCase.js';
+import VerifyUserEmailUseCase from '../Applications/use_case/VerifyUserEmailUseCase.js';
 
 // authentications
 import AuthenticationTokenManager from '../Applications/security/AuthenticationTokenManager.js';
@@ -54,6 +56,8 @@ import LikeRepository from '../Domains/likes/LikeRepository.js';
 import LikeRepositoryPostgres from './repository/LikeRepositoryPostgres.js';
 import UpdateLikeUseCase from '../Applications/use_case/UpdateLikeUseCase.js';
 import GetLikeStatusUseCase from '../Applications/use_case/GetLikeStatusUseCase.js';
+import EmailService from '../Applications/services/EmailService.js';
+import QstashEmailService from './services/QstashEmailService.js';
 
 // creating container
 const container = createContainer();
@@ -63,6 +67,26 @@ container.register([
   {
     key: CacheRedis.name,
     Class: CacheRedis,
+  },
+  {
+    key: EmailService.name,
+    Class: QstashEmailService,
+    parameter: {
+      dependencies: [
+        {
+          concrete: {
+            token: config.qstash.token,
+            baseUrl: config.qstash.baseUrl,
+            targetUrl: config.qstash.emailTargetUrl,
+            topic: config.qstash.emailTopic,
+            headers: config.qstash.emailHeaders,
+            subject: config.email.verificationSubject,
+            from: config.email.from,
+            verificationTtlMinutes: config.email.verificationTtlMinutes,
+          },
+        },
+      ],
+    },
   },
   {
     key: UserRepository.name,
@@ -180,6 +204,33 @@ container.register([
   {
     key: AddUserUseCase.name,
     Class: AddUserUseCase,
+    parameter: {
+      injectType: 'destructuring',
+      dependencies: [
+        {
+          name: 'userRepository',
+          internal: UserRepository.name,
+        },
+        {
+          name: 'passwordHash',
+          internal: PasswordHash.name,
+        },
+        {
+          name: 'emailService',
+          internal: EmailService.name,
+        },
+        {
+          name: 'verificationConfig',
+          concrete: {
+            verificationTtlMinutes: config.email.verificationTtlMinutes,
+          },
+        },
+      ],
+    },
+  },
+  {
+    key: VerifyUserEmailUseCase.name,
+    Class: VerifyUserEmailUseCase,
     parameter: {
       injectType: 'destructuring',
       dependencies: [

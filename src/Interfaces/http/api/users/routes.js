@@ -5,6 +5,11 @@ const routes = (handler) => [
     handler: handler.postUserHandler,
   },
   {
+    method: 'POST',
+    path: '/users/verify-email',
+    handler: handler.postVerifyEmailHandler,
+  },
+  {
     method: 'GET',
     path: '/users/me',
     handler: handler.getOwnUserHandler,

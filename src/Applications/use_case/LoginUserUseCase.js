@@ -1,5 +1,6 @@
 import UserLogin from '../../Domains/users/entities/UserLogin.js';
 import NewAuthentication from '../../Domains/authentications/entities/NewAuth.js';
+import InvariantError from '../../Commons/exceptions/InvariantError.js';
 
 class LoginUserUseCase {
   constructor({
@@ -17,13 +18,21 @@ class LoginUserUseCase {
   async execute(useCasePayload) {
     const { username, password } = new UserLogin(useCasePayload);
 
-    const encryptedPassword = await this._userRepository.getPasswordByUsername(
-      username,
+    const userCredentials =
+      await this._userRepository.getPasswordByUsername(username);
+
+    await this._passwordHash.comparePassword(
+      password,
+      userCredentials.password,
     );
 
-    await this._passwordHash.comparePassword(password, encryptedPassword);
+    if (!userCredentials.is_email_verified) {
+      throw new InvariantError(
+        'Email belum terverifikasi. Silakan cek kotak masuk Anda.',
+      );
+    }
 
-    const id = await this._userRepository.getIdByUsername(username);
+    const { id } = userCredentials;
 
     const accessToken =
       await this._authenticationTokenManager.createAccessToken({

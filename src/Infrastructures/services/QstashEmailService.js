@@ -63,6 +63,9 @@ class QstashEmailService extends EmailService {
       );
       await this._client.publishJSON(publishPayload);
       console.info(
+        `[QSTASH] Successfully published verification  ${publishPayload}`,
+      );
+      console.info(
         `[QSTASH] Successfully published verification email for: ${to} with messageId: ${
           publishPayload.messageId
         } at ${new Date().toISOString()}`,

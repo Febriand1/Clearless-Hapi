@@ -46,6 +46,7 @@ class QstashEmailService extends EmailService {
 
     const publishPayload = {
       body: payload,
+      delay: 10,
     };
 
     if (this._headers && Object.keys(this._headers).length > 0) {

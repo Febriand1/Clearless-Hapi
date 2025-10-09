@@ -78,8 +78,6 @@ container.register([
             token: config.qstash.token,
             baseUrl: config.qstash.baseUrl,
             targetUrl: config.qstash.emailTargetUrl,
-            topic: config.qstash.emailTopic,
-            headers: config.qstash.emailHeaders,
             subject: config.email.verificationSubject,
             from: config.email.from,
             verificationTtlMinutes: config.email.verificationTtlMinutes,

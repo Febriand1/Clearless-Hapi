@@ -4,22 +4,14 @@ import EmailService from '../../Applications/services/EmailService.js';
 class QstashEmailService extends EmailService {
   constructor(options = {}) {
     super();
-    const {
-      token,
-      targetUrl,
-      topic,
-      subject,
-      from,
-      verificationTtlMinutes,
-      baseUrl,
-      headers,
-    } = options;
+    const { token, targetUrl, subject, from, verificationTtlMinutes, baseUrl } =
+      options;
 
     if (!token) {
       throw new Error('QSTASH_EMAIL_SERVICE.MISSING_TOKEN');
     }
 
-    if (!targetUrl && !topic) {
+    if (!targetUrl) {
       throw new Error('QSTASH_EMAIL_SERVICE.MISSING_DESTINATION');
     }
 
@@ -29,13 +21,11 @@ class QstashEmailService extends EmailService {
     });
 
     this._targetUrl = targetUrl;
-    this._topic = topic;
     this._subject =
       subject ||
       'Kode Verifikasi Email Clearless Forum'; /* default subject fallback */
     this._from = from || 'no-reply@clearless-forum.local';
     this._verificationTtlMinutes = verificationTtlMinutes || 10;
-    this._headers = headers || { 'Content-Type': 'application/json' };
   }
 
   async sendVerificationEmail({ to, code, name }) {
@@ -59,12 +49,10 @@ class QstashEmailService extends EmailService {
     };
 
     if (this._headers && Object.keys(this._headers).length > 0) {
-      publishPayload.headers = this._headers;
+      publishPayload.headers = { 'Content-Type': 'application/json' };
     }
 
-    if (this._topic) {
-      publishPayload.topic = this._topic;
-    } else {
+    if (this._targetUrl) {
       publishPayload.url = this._targetUrl;
     }
 

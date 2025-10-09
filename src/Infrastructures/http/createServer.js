@@ -70,6 +70,15 @@ const createServer = async (container) => {
     },
   ]);
 
+  // Handle OPTIONS requests for CORS
+  server.route({
+    method: 'OPTIONS',
+    path: '/{path*}',
+    handler: (request, h) => {
+      return h.response().code(200);
+    },
+  });
+
   server.route({
     method: 'GET',
     path: '/',
@@ -85,12 +94,27 @@ const createServer = async (container) => {
     },
   });
 
+  // Add CORS headers
   server.ext('onPreResponse', (request, h) => {
     const { response } = request;
 
+    // Add CORS headers
+    if (response && response.header) {
+      response.header('Access-Control-Allow-Origin', '*');
+      response.header(
+        'Access-Control-Allow-Methods',
+        'GET, POST, PUT, DELETE, OPTIONS',
+      );
+      response.header(
+        'Access-Control-Allow-Headers',
+        'Content-Type, Authorization',
+      );
+      response.header('Content-Encoding', 'identity');
+    }
+
     if (response instanceof Error) {
+      console.log(response);
       const translatedError = DomainErrorTranslator.translate(response);
-      // console.log(translatedError);
 
       if (translatedError instanceof ClientError) {
         const newResponse = h.response({

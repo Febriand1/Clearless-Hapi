@@ -39,6 +39,21 @@ const createServer = async (container) => {
     }),
   });
 
+  // Keep Redis active
+  const cacheService = container.getInstance('CacheRedis');
+  if (cacheService && cacheService.redis) {
+    const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
+    setInterval(() => {
+      cacheService.redis.ping()
+        .then(() => console.log('Redis pinged successfully to keep connection alive.'))
+        .catch((err) => console.error('Failed to ping Redis:', err));
+    }, twentyFourHoursInMs);
+    // Initial ping on server start
+    cacheService.redis.ping()
+      .then(() => console.log('Initial Redis ping successful.'))
+      .catch((err) => console.error('Initial Redis ping failed:', err));
+  }
+
   await server.register([
     {
       plugin: users,

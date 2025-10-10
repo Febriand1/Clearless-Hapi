@@ -8,7 +8,6 @@ import threads from '../../Interfaces/http/api/threads/index.js';
 import comments from '../../Interfaces/http/api/comments/index.js';
 import replies from '../../Interfaces/http/api/replies/index.js';
 import likes from '../../Interfaces/http/api/likes/index.js';
-import email from '../../Interfaces/http/api/email/index.js';
 import { config } from '../../Utils/config.js';
 
 const createServer = async (container) => {

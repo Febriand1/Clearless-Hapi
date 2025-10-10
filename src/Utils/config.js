@@ -29,17 +29,9 @@ export const config = {
   qstash: {
     token: process.env.QSTASH_TOKEN,
     baseUrl: process.env.QSTASH_URL,
-    currentSigning: process.env.QSTASH_CURRENT_SIGNING_KEY,
-    nextSigning: process.env.QSTASH_NEXT_SIGNING_KEY,
     emailTargetUrl: process.env.QSTASH_EMAIL_TARGET_URL,
     emailTopic: process.env.QSTASH_EMAIL_TOPIC,
     emailHeaders: safeJsonParse(process.env.QSTASH_EMAIL_HEADERS),
-  },
-  smtp: {
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
   },
 };
 

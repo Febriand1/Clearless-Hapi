@@ -1,4 +1,4 @@
-# Forum API
+# Clearless Hapi
 
 This is a RESTful API for a forum application, built with Node.js, Hapi, and PostgreSQL. It provides functionalities for user management, threads, comments, replies, and likes.
 

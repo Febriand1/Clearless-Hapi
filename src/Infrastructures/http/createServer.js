@@ -90,6 +90,14 @@ const createServer = async (container) => {
     },
   });
 
+    server.route({
+      method: 'GET',
+      path: '/favicon.ico',
+      handler: (request, h) => {
+        return h.code(204);
+      },
+    });
+
   // Add CORS headers
   server.ext('onPreResponse', (request, h) => {
     const { response } = request;

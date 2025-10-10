@@ -65,9 +65,6 @@ const createServer = async (container) => {
       plugin: likes,
       options: { container },
     },
-    {
-      plugin: email,
-    },
   ]);
 
   // Handle OPTIONS requests for CORS
